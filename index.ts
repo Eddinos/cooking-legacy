@@ -1,8 +1,9 @@
 import { generateDistribution } from './beta-sample.js'
 import { pickValue } from './beta-wrc.js'
 import { pickValueG } from './gaussian.js'
+import Cook from './cook.js'
 
-const MAX_ALPHA = 80
+const MAX_ALPHA = 20
 const TEST_MODE = 95
 
 function betaFromModeAndAlpha ({alpha, mode}: {alpha: number, mode: number}) {
@@ -21,37 +22,43 @@ const funfunwithsin = (maxAplha: number) => (mode: number) => (maxAplha - 1)*Mat
 
 const getAlphaFromMode = setMaxAlpha(MAX_ALPHA)
 
+function getValueFromMode (mode: number) {
+    const alpha = getAlphaFromMode(mode)
+    const beta = betaFromModeAndAlpha({alpha: getAlphaFromMode(mode), mode})
+    return pickValue(alpha, beta)
+}
+
 // console.log(getAlphaFromMode(0))
 
 // const testMode = 0.95
 
-const paramsSet = {
-    mode: TEST_MODE,
-    alpha: getAlphaFromMode(TEST_MODE / 100),
-    beta: betaFromModeAndAlpha({alpha: getAlphaFromMode(TEST_MODE / 100), mode: TEST_MODE / 100})
-}
+// const paramsSet = {
+//     mode: TEST_MODE,
+//     alpha: getAlphaFromMode(TEST_MODE / 100),
+//     beta: betaFromModeAndAlpha({alpha: getAlphaFromMode(TEST_MODE / 100), mode: TEST_MODE / 100})
+// }
 
-console.log(paramsSet)
+// console.log(paramsSet)
 
-let mean = []
-for (let i = 0; i<1000; i++) {
-    mean.push(pickValue(paramsSet.alpha, paramsSet.beta))
-}
+// let mean = []
+// for (let i = 0; i<1000; i++) {
+//     mean.push(pickValue(paramsSet.alpha, paramsSet.beta))
+// }
 
-console.log('pickvalue mean', mean.reduce(function (avg, value, _, { length }) {
-    return avg + value / length;
-}, 0))
+// console.log('pickvalue mean', mean.reduce(function (avg, value, _, { length }) {
+//     return avg + value / length;
+// }, 0))
 
-let meanG = []
-for (let i = 0; i<1000; i++) {
-    meanG.push(pickValueG({mode: paramsSet.mode}))
-}
+// let meanG = []
+// for (let i = 0; i<1000; i++) {
+//     meanG.push(pickValueG({mode: paramsSet.mode}))
+// }
 
-console.log('pickvalueG mean', meanG.reduce(function (avg, value, _, { length }) {
-    return avg + value / length;
-}, 0))
+// console.log('pickvalueG mean', meanG.reduce(function (avg, value, _, { length }) {
+//     return avg + value / length;
+// }, 0))
 
-console.log(mean)
+// console.log(mean)
 
 
 // function picpic (distrib, mode) {
@@ -66,3 +73,28 @@ console.log(mean)
 //             break;
 //     }
 // }
+
+const edd = new Cook({ stats: {
+    knowledge: 50,
+    skills: 50,
+    speed: 50,
+    taste: 50
+}, name: 'Eddine' })
+
+const manue = new Cook({ stats: {
+    knowledge: 50,
+    skills: 50,
+    speed: 50,
+    taste: 50
+}, name: 'Manue'})
+
+edd.addPartner(manue)
+
+const tessa = manue.mate(edd, 'Tessa')
+
+// console.log(tessa.familyTree())
+// console.log(edd.familyTree())
+
+// console.log(tessa.stats)
+
+console.log(getValueFromMode(0.2))

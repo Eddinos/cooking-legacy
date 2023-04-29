@@ -16,10 +16,11 @@ export default function weightedRandomChoice (items: number[], weights: number[]
 export function generateWeights(getWeight: (i: number) => number, valuesNb: number = 100) {
     const values: number[] = []
     const weights: number[] = []
+    const offset: number = 0.6
     // const curryPDF = (a: number, b: number) => (x: number) => betaPDF(x, a, b)
     // const alphaBetaPDF = curryPDF(alpha, beta)
     for (let i = 0; i<=valuesNb; i++) {
-        weights.push(getWeight(i))
+        weights.push(getWeight(i) + offset)
         values.push(i)
     }
     return {
