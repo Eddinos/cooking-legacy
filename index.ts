@@ -90,11 +90,16 @@ const manue = new Cook({ stats: {
 
 edd.addPartner(manue)
 
-const tessa = manue.mate(edd, 'Tessa')
+const egg = manue.mate(edd, 'Tessa')
+async function waitForEgg() {
+    const tessa = await egg.hatch()
+    console.log('tessas stats', tessa.stats)
+}
+waitForEgg()
+console.log('The game keeps going')
 
 // console.log(tessa.familyTree())
 // console.log(edd.familyTree())
 
-console.log('tessas stats', tessa.stats)
 
 // console.log(getValueFromMode(0.2))

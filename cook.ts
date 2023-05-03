@@ -8,8 +8,12 @@ interface ICook {
 }
 
 interface IMatable {
-    mate(partner: IMatable, childName: string): IMatable,
+    mate(partner: IMatable, childName: string): IHatchable<IMatable>,
     partners: IMatable[]
+}
+
+interface IHatchable<T> {
+    hatch(): Promise<T> | void
 }
 
 export type CookStatsProperties = 'knowledge' | 'speed' | 'taste' | 'skills'
@@ -23,6 +27,49 @@ export type CookStatsProperties = 'knowledge' | 'speed' | 'taste' | 'skills'
 // }
 
 export type CookStats = Record<CookStatsProperties, number>
+
+class Egg implements IHatchable<IMatable> {
+    constructor ({parents, name}: {parents: [IMatable, IMatable], name: string}) {
+        this.parents = parents
+        this.name = name
+        this.isWaiting = true
+    }
+
+    parents: IMatable[]
+    name: string
+    protected isWaiting: boolean
+
+    hatch () {
+        this.isWaiting = false
+        throw new Error('other types not handled yet')
+    }
+}
+
+class CookEgg extends Egg implements IHatchable<Cook> {
+    constructor ({parents, name}: {parents: [Cook, Cook], name: string}) {
+        super({parents, name})
+    }
+
+    hatch () {
+        if (this.parents[0] instanceof Cook && this.parents[1] instanceof Cook && this.isWaiting) {
+            this.isWaiting = false
+            const offspring = new Cook({ 
+                ancestors: [this.parents[0], this.parents[1]], 
+                stats: getStatsFromParents(this.parents[0], this.parents[1]), 
+                name: this.name
+            })
+            return new Promise<Cook>((resolve, reject) => {
+                setTimeout(() => {
+                    resolve(offspring)
+                }, 10000)
+            })
+        }
+
+        throw new Error('somthing went wrong with its parents')
+    }
+
+
+}
 
 export default class Cook implements ICook, IMatable {
     constructor({ancestors, stats, name}: {ancestors?: Cook[], stats: CookStats, name: string}) {
@@ -43,14 +90,10 @@ export default class Cook implements ICook, IMatable {
 
     public mate (partner: Cook, childName: string) {
         if (this.partners.includes(partner)) {
-            const child = new Cook({ ancestors: [this, partner], stats: getStatsFromParents(this, partner), name: childName}) as Cook;
-            this.children.push(child)
-            partner.children.push(child)
-            return child
+            return new CookEgg({ parents: [this, partner], name: childName})
         } else {
-            console.log('wtf bro you cant do that')
+            throw new Error('cannot mate with an unknown partner')
         }
-        return this;
     }
 
     public familyTree () {
@@ -77,12 +120,3 @@ function getStatsFromParents (parent1: ICook, parent2: ICook): CookStats {
 
     return generateStats(meanStats);
 }
-
-// class Cook {
-//     constructor() {
-        
-//     }
-
-//     private children = []
-//     private ancestors = []
-// }
