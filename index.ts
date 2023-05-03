@@ -76,14 +76,14 @@ function getValueFromMode (mode: number) {
 
 const edd = new Cook({ stats: {
     knowledge: 50,
-    skills: 50,
-    speed: 50,
-    taste: 50
+    skills: 0,
+    speed: 99,
+    taste: 0
 }, name: 'Eddine' })
 
 const manue = new Cook({ stats: {
-    knowledge: 50,
-    skills: 50,
+    knowledge: 100,
+    skills: 0,
     speed: 50,
     taste: 50
 }, name: 'Manue'})
@@ -95,6 +95,6 @@ const tessa = manue.mate(edd, 'Tessa')
 // console.log(tessa.familyTree())
 // console.log(edd.familyTree())
 
-// console.log(tessa.stats)
+console.log('tessas stats', tessa.stats)
 
-console.log(getValueFromMode(0.2))
+// console.log(getValueFromMode(0.2))

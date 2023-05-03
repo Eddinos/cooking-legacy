@@ -1,35 +1,54 @@
 import { pickValue } from "./beta-wrc.js"
-import Cook, { CookStats } from "./cook.js"
+import { sampleBetaLaw } from "./beta-sample.js"
+import Cook, { CookStats, CookStatsProperties } from "./cook.js"
 
-const MAX_ALPHA = 20
+const MAX_ALPHA = 60
+
+enum pickingModes {
+    wrc = 'wrc',
+    sample = 'sample',
+    gaussian = 'gauss'
+}
 
 function betaFromModeAndAlpha ({alpha, mode}: {alpha: number, mode: number}) {
     mode = Math.max(mode, 0.001)
-    return (alpha*(1 - mode)+2*mode-1)/mode
+    return Math.max((alpha*(1 - mode)+2*mode-1)/mode, 10)
 }
 
 const setMaxAlpha = (maxAplha: number) => (mode: number) => -4*(maxAplha - 1)*Math.pow((mode - 1/2), 2) + maxAplha
 const funfunwithsin = (maxAplha: number) => (mode: number) => (maxAplha - 1)*Math.sin(mode * Math.PI) + 1
 
-// console.log(generateDistribution(100))
-
-// console.log({result: pickValue()})
-
-// console.log(betaFromModeAndAlpha({alpha: 6, mode: 0.60}))
-
 const getAlphaFromMode = setMaxAlpha(MAX_ALPHA)
 
-function getValueFromMode (mode: number) {
+function getValueFromMode (mode: number, pickingMethod: pickingModes) {
+    // Necessary for PDF - WRC picking (Math.log(0) is NaN)
+    // const notZeroMode = Math.max(mode, 0.0001)
     const alpha = getAlphaFromMode(mode)
-    const beta = betaFromModeAndAlpha({alpha: getAlphaFromMode(mode), mode})
-    return pickValue(alpha, beta)
+    const beta = Math.max(betaFromModeAndAlpha({alpha, mode}), 1)
+    console.log({alpha, beta})
+    switch (pickingMethod) {
+        case pickingModes.sample:
+            return Math.round(sampleBetaLaw(alpha, beta)*100)
+        case pickingModes.wrc:
+            return pickValue(alpha, beta)
+        default:
+            return 0
+    } 
 }
 
 export default function generateStats (modedStats: CookStats): CookStats {
-    return {
-        knowledge: getValueFromMode(modedStats.knowledge),
-        skills: getValueFromMode(modedStats.skills),
-        speed: getValueFromMode(modedStats.speed),
-        taste: getValueFromMode(modedStats.taste),
-    }
+
+    // Not sure about this one though
+    const keys = Object.keys(modedStats) as CookStatsProperties[]
+    return keys.reduce<CookStats>((acc: CookStats, key: CookStatsProperties) => {
+        acc[key] = getValueFromMode(modedStats[key] / 100, pickingModes.sample)
+        return acc
+    }, {} as CookStats)
+
+    // return {
+    //     knowledge: getValueFromMode(modedStats.knowledge / 100),
+    //     skills: getValueFromMode(modedStats.skills / 100),
+    //     speed: getValueFromMode(modedStats.speed / 100),
+    //     taste: getValueFromMode(modedStats.taste / 100),
+    // }
 }

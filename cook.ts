@@ -12,12 +12,17 @@ interface IMatable {
     partners: IMatable[]
 }
 
-export interface CookStats {
-    knowledge: number,
-    speed: number,
-    taste: number,
-    skills: number
-}
+export type CookStatsProperties = 'knowledge' | 'speed' | 'taste' | 'skills'
+
+// export interface CookStats {
+//     knowledge: number,
+//     speed: number,
+//     taste: number,
+//     skills: number,
+//     [key: string]: number
+// }
+
+export type CookStats = Record<CookStatsProperties, number>
 
 export default class Cook implements ICook, IMatable {
     constructor({ancestors, stats, name}: {ancestors?: Cook[], stats: CookStats, name: string}) {
@@ -59,13 +64,18 @@ export default class Cook implements ICook, IMatable {
     partners: IMatable[] = []
 }
 
-function getStatsFromParents (parent1: IMatable, parent2: IMatable): CookStats {
-    return {
-        knowledge: 0,
-        skills: 0,
-        taste: 0,
-        speed: 0
+function getStatsFromParents (parent1: ICook, parent2: ICook): CookStats {
+
+    const mean = (a: number, b: number) => (a + b) / 2
+
+    const meanStats: CookStats = {
+        knowledge: mean(parent1.stats.knowledge, parent2.stats.knowledge),
+        skills: mean(parent1.stats.skills, parent2.stats.skills),
+        speed: mean(parent1.stats.speed, parent2.stats.speed),
+        taste: mean(parent1.stats.taste, parent2.stats.taste)
     }
+
+    return generateStats(meanStats);
 }
 
 // class Cook {
