@@ -1,7 +1,7 @@
-import { generateDistribution } from './beta-sample.js'
-import { pickValue } from './beta-wrc.js'
-import { pickValueG } from './gaussian.js'
-import Cook from './cook.js'
+import { generateDistribution } from './Probability/beta-sample.js'
+import { pickValue } from './Probability/beta-wrc.js'
+import { pickValueG } from './Probability/gaussian.js'
+import Cook from './Cooking/cook.js'
 
 const MAX_ALPHA = 20
 const TEST_MODE = 95

@@ -1,14 +1,7 @@
-import { pickValue } from "./beta-wrc.js"
 import { sampleBetaLaw } from "./beta-sample.js"
-import Cook, { CookStats, CookStatsProperties } from "./cook.js"
+import { pickValue } from "./beta-wrc.js"
 
 const MAX_ALPHA = 60
-
-enum pickingModes {
-    wrc = 'wrc',
-    sample = 'sample',
-    gaussian = 'gauss'
-}
 
 function betaFromModeAndAlpha ({alpha, mode}: {alpha: number, mode: number}) {
     mode = Math.max(mode, 0.001)
@@ -21,7 +14,13 @@ const setMaxAlpha = (maxAplha: number) => (mode: number) => -4*(maxAplha - 1)*Ma
 
 const getAlphaFromMode = setMaxAlpha(MAX_ALPHA)
 
-function getValueFromMode (mode: number, pickingMethod: pickingModes): number {
+export enum pickingModes {
+    wrc = 'wrc',
+    sample = 'sample',
+    gaussian = 'gauss'
+}
+
+export default function (mode: number, pickingMethod: pickingModes): number {
     // Necessary for PDF - WRC picking (Math.log(0) is NaN)
     // const notZeroMode = Math.max(mode, 0.0001)
     const alpha = getAlphaFromMode(mode)
@@ -35,21 +34,4 @@ function getValueFromMode (mode: number, pickingMethod: pickingModes): number {
         default:
             return 0
     } 
-}
-
-export default function generateStats (modedStats: CookStats): CookStats {
-
-    // Not sure about this one though
-    const keys = Object.keys(modedStats) as CookStatsProperties[]
-    return keys.reduce<CookStats>((acc: CookStats, key: CookStatsProperties) => {
-        acc[key] = getValueFromMode(modedStats[key] / 100, pickingModes.sample)
-        return acc
-    }, {} as CookStats)
-
-    // return {
-    //     knowledge: getValueFromMode(modedStats.knowledge / 100),
-    //     skills: getValueFromMode(modedStats.skills / 100),
-    //     speed: getValueFromMode(modedStats.speed / 100),
-    //     taste: getValueFromMode(modedStats.taste / 100),
-    // }
 }
